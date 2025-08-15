@@ -8,6 +8,7 @@ import {
   getDoctorAppointments,
   sendAppointment,
   updateAppointmentStatus,
+  bookAppointment,
   
 } from "../controller/appointmentController.js";
 import {
@@ -25,6 +26,7 @@ router.delete("/:id", isAuthenticated, deleteAppointmentByPatient);
 router.get("/rdv", isAuthenticated, isAuthorized("Doctor"), getDoctorAppointments);
 router.post("/send-appointment/:doctorId", isAuthenticated, sendAppointment);
 router.put("/:appointmentId/status", isAuthenticated, updateAppointmentStatus);
+router.post("/book", isAuthenticated, bookAppointment);
 
 
 export default router;

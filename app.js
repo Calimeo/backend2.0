@@ -31,7 +31,12 @@ import nurseRoute from "./router/nurse.routes.js";
 import pharmacyRoute from "./router/pharmacy.routes.js";
 import purchaseRoute from "./router/purchase.routes.js";
 import accountingRoute from "./router/accounting.router.js";
-
+import availabilityRoute from "./router/availability.routes.js";
+import bloodStockRoute from "./router/bloodStock.routes.js";
+import deathRoute from "./router/death.routes.js";
+import hospitalDashboardRoutes from "./router/dashboard.routes.js";
+import birthRoute from "./router/birth.routes.js";
+import prescriptionRoute from "./router/prescription.routes.js";
 
 const app = express()
 
@@ -54,6 +59,10 @@ app.use(fileUpload({
     tempFileDir: "/tmp/",
 })
 );
+
+app.get("/", (req, res) => {
+  res.send("API is running 🟢");
+});
 
 
 app.use("/api/v1/user", userRouter);
@@ -82,6 +91,13 @@ app.use("/api/v1/nurse", nurseRoute);
 app.use("/api/v1", pharmacyRoute);
 app.use("/api/v1", purchaseRoute);
 app.use("/api/v1/accounting", accountingRoute);
+app.use("/api/v1/availability", availabilityRoute);
+app.use("/api/v1/blood", bloodStockRoute);
+app.use("/api/v1/death", deathRoute);
+app.use("/api/v1/dashboard", hospitalDashboardRoutes);
+app.use("/api/v1/birth", birthRoute);
+app.use("/api/v1/prescription", prescriptionRoute);
+
 
 dbConnection();
 

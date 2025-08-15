@@ -1,5 +1,6 @@
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/errorMiddleware.js";
+import DoctorAvailability from "../models/DoctorAvailability.js";
 import { Appointment } from "../models/appointmentSchema.js";
 import { User } from "../models/userSchema.js";
 import { sendEmail } from "../utils/sendMail.js";
@@ -174,6 +175,55 @@ export const updateAppointmentStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur lors de la mise à jour du statut:", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+
+
+export const bookAppointment = async (req, res) => {
+  try {
+    const { availabilityId, reason } = req.body;
+    const patientId = req.user._id;
+
+    const slot = await DoctorAvailability.findById(availabilityId).populate("doctor");
+
+    if (!slot || slot.isBooked) {
+      return res.status(400).json({ message: "Créneau indisponible" });
+    }
+
+    const appointment = new Appointment({
+      patient: patientId,
+      doctor: slot.doctor._id,
+      date: slot.date,
+      reason
+    });
+
+    await appointment.save();
+
+    // Marquer le créneau comme réservé
+    slot.isBooked = true;
+    await slot.save();
+
+    // Envoi d'email au docteur
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    await transporter.sendMail({
+      from: `"MediLink" <${process.env.EMAIL_USER}>`,
+      to: slot.doctor.email,
+      subject: "Nouveau rendez-vous réservé",
+      text: `Vous avez un nouveau rendez-vous le ${slot.date}.\nRaison: ${reason}`
+    });
+
+    res.status(201).json({ message: "Rendez-vous réservé avec succès", appointment });
+  } catch (error) {
+    console.error("Erreur réservation rendez-vous:", error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };

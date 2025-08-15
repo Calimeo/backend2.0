@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const accountingSchema = new mongoose.Schema({
+  hospital: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", // ou "Hospital" selon ton modèle
+    required: true,
+  },
   type: {
     type: String,
     enum: ["income", "expense"],
