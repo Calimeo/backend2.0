@@ -10,7 +10,7 @@ const router = express.Router();
 router.post("/", isAuthenticated, addDeath);
 
 // Lister les décès d'un hôpital
-router.get("/:hospitalId", isAuthenticated, getDeathsByHospital);
+router.get("/hospital", isAuthenticated, getDeathsByHospital);
 
 // Supprimer un décès
 router.delete("/:id",isAuthenticated, deleteDeath);

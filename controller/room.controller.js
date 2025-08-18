@@ -1,9 +1,19 @@
 import Room from "../models/room.js";
 
-// Obtenir toutes les chambres
+// Middleware de vérification (à utiliser dans vos routes)
+export const checkHospitalAdmin = (req, res, next) => {
+  if (!req.user?.hospital) {
+    return res.status(403).json({ message: "Accès réservé aux administrateurs d'hôpital" });
+  }
+  next();
+};
+
+// Obtenir toutes les chambres de l'hôpital
 export const getRooms = async (req, res) => {
   try {
-    const rooms = await Room.find();
+    const rooms = await Room.find({ 'beds.hospital': req.user.hospital._id })
+      .populate('beds.hospital');
+    
     res.status(200).json(rooms);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -14,48 +24,62 @@ export const getRooms = async (req, res) => {
 export const createRoom = async (req, res) => {
   try {
     const { name } = req.body;
-    const existing = await Room.findOne({ name });
 
-    if (existing) {
-      return res.status(400).json({ message: "Cette chambre existe déjà." });
+    const existingRoom = await Room.findOne({ 
+      name,
+      'beds.hospital': req.user.hospital._id 
+    });
+
+    if (existingRoom) {
+      return res.status(400).json({ 
+        message: "Une chambre avec ce nom existe déjà dans votre hôpital." 
+      });
     }
 
-    const room = new Room({ name, beds: [] });
+    const room = new Room({ 
+      name,
+      beds: []
+    });
+    
     await room.save();
-
     res.status(201).json(room);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Supprimer une chambre
-export const deleteRoom = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Room.findByIdAndDelete(id);
-    res.status(200).json({ message: "Chambre supprimée." });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Ajouter un lit à une chambre
+// Ajouter un lit
 export const addBed = async (req, res) => {
   try {
     const { roomId } = req.params;
     const { number } = req.body;
 
-    const room = await Room.findById(roomId);
-    if (!room) return res.status(404).json({ message: "Chambre introuvable." });
+    const room = await Room.findOne({
+      _id: roomId,
+      'beds.hospital': req.user.hospital._id
+    });
 
-    if (room.beds.some((bed) => bed.number.toLowerCase() === number.toLowerCase())) {
-      return res.status(400).json({ message: "Ce lit existe déjà." });
+    if (!room) {
+      return res.status(404).json({ message: "Chambre introuvable ou non autorisée." });
     }
 
-    room.beds.push({ number });
-    await room.save();
+    const bedExists = room.beds.some(
+      bed => bed.number === number && bed.hospital.equals(req.user.hospital._id)
+    );
 
+    if (bedExists) {
+      return res.status(400).json({ 
+        message: "Ce lit existe déjà dans cette chambre." 
+      });
+    }
+
+    room.beds.push({ 
+      number,
+      hospital: req.user.hospital._id, // Ici on utilise bien hospital._id
+      available: true
+    });
+
+    await room.save();
     res.status(200).json(room);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -67,33 +91,72 @@ export const deleteBed = async (req, res) => {
   try {
     const { roomId, bedId } = req.params;
 
-    const room = await Room.findById(roomId);
-    if (!room) return res.status(404).json({ message: "Chambre non trouvée." });
+    const room = await Room.findOne({
+      _id: roomId,
+      'beds.hospital': req.user.hospital._id
+    });
+    
+    if (!room) {
+      return res.status(404).json({ message: "Chambre non trouvée ou non autorisée." });
+    }
 
-    room.beds = room.beds.filter((bed) => bed._id.toString() !== bedId);
+    const bed = room.beds.id(bedId);
+    if (!bed || !bed.hospital.equals(req.user.hospital._id)) {
+      return res.status(404).json({ message: "Lit non trouvé ou non autorisé." });
+    }
+
+    bed.remove();
     await room.save();
-
     res.status(200).json(room);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Bascule la disponibilité d’un lit
+// Basculer disponibilité
 export const toggleBedAvailability = async (req, res) => {
   try {
     const { roomId, bedId } = req.params;
 
-    const room = await Room.findById(roomId);
-    if (!room) return res.status(404).json({ message: "Chambre non trouvée." });
+    const room = await Room.findOne({
+      _id: roomId,
+      'beds.hospital': req.user.hospital._id
+    });
+
+    if (!room) {
+      return res.status(404).json({ message: "Chambre non trouvée ou non autorisée." });
+    }
 
     const bed = room.beds.id(bedId);
-    if (!bed) return res.status(404).json({ message: "Lit introuvable." });
+    if (!bed || !bed.hospital.equals(req.user.hospital._id)) {
+      return res.status(404).json({ message: "Lit non trouvé ou non autorisé." });
+    }
 
     bed.available = !bed.available;
     await room.save();
-
     res.status(200).json(room);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Supprimer une chambre
+export const deleteRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    
+    const room = await Room.findOneAndDelete({
+      _id: roomId,
+      'beds.hospital': req.user.hospital._id
+    });
+
+    if (!room) {
+      return res.status(404).json({ 
+        message: "Chambre introuvable ou non autorisée." 
+      });
+    }
+
+    res.status(200).json({ message: "Chambre supprimée avec succès." });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

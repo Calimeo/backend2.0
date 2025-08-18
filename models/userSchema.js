@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
   gender: {
     type: String,
     required: [false, "Gender Is Required!"],
-    enum: ["Male", "Female"],
+    enum: ["Male", "Female","Feminin","Masculin"],
   },
   password: {
     type: String,
@@ -75,6 +75,11 @@ const userSchema = new mongoose.Schema({
   type: mongoose.Schema.Types.ObjectId,
   ref: "User", // ou "Hospital" si tu as un modèle séparé
 },
+ status: {
+    type: String,
+    enum: ['present', 'absent', 'on_break'],
+    default: 'present'
+  },
 });
 
 userSchema.pre("save", async function (next) {

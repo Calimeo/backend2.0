@@ -43,7 +43,7 @@ const app = express()
 config({path:"./config/config.env"})
 app.use(
     cors({
-      origin:["https://medilink-2-0.vercel.app",process.env.DASHBOARD_URL,"https://medihubhopital.vercel.app","https://medihub-doctor-ashen.vercel.app"],
+      origin:[process.env.FRONTEND_URL,process.env.DASHBOARD_URL,process.env.DASHBOARDHOPITAL_URL,process.env.DASHBOARDDOCTOR_URL],
       methods:["GET", "POST", "PUT", "DELETE","PATCH"],
       credentials: true,
 
@@ -87,7 +87,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use("/api/v1/doctors", hospitalDoctorRoute);
 app.use("/api/v1/service", serviceRoute);
 // app.use("/api/v1/rvz", apppoitmentallRoute);
-app.use("/api/v1/nurse", nurseRoute);
+app.use("/api/nurses", nurseRoute);
 app.use("/api/v1", pharmacyRoute);
 app.use("/api/v1", purchaseRoute);
 app.use("/api/v1/accounting", accountingRoute);

@@ -1,6 +1,25 @@
 // models/Nurse.js
 import mongoose from "mongoose";
 
+const shiftSchema = new mongoose.Schema({
+  date: {
+    type: Date,
+    required: true
+  },
+  shiftType: {
+    type: String,
+    enum: ['morning', 'afternoon', 'night'],
+    required: true
+  },
+  completed: {
+    type: Boolean,
+    default: false
+  },
+  completedAt: {
+    type: Date
+  }
+});
+
 const nurseSchema = new mongoose.Schema(
   {
     name: {
@@ -17,11 +36,17 @@ const nurseSchema = new mongoose.Schema(
     },
     present: {
       type: Boolean,
-      default: false, // par défaut absente
+      default: false,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+    shifts: [shiftSchema],
+    totalHours: {
+      type: Number,
+      default: 0
+    },
+    hospital: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", 
+      required: [true, "il manque id du hopital"],
     },
   },
   { timestamps: true }

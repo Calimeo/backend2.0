@@ -9,7 +9,13 @@ const bedSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  hospital: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Hospital", // ou "Hospital" si tu as un modèle distinct
+      required: [true, "L'hôpital est requis."],
+    },
 });
+
 
 const roomSchema = new mongoose.Schema({
   name: {

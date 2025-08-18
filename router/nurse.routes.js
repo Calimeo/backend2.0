@@ -1,28 +1,29 @@
 // routes/nurseRoutes.js
-import express from "express";
+import express from 'express';
 import {
   addNurse,
-  getAllNurses,
-  updateNurse,
+  listNurses,
   deleteNurse,
-  togglePresence,
-} from "../controller/nurse.controller.js";
+  scheduleShifts,
+  completeShift,
+  getWorkedHours,
+  getOnDutyNurses,
+  listAllShifts
+} from '../controller/nurse.controller.js';
+import {
+  isAuthenticated,
+  isAuthorized,
+} from "../middlewares/auth.js";
 
 const router = express.Router();
 
-// Créer une infirmière
-router.post("/", addNurse);
-
-// Voir toutes les infirmières
-router.get("/", getAllNurses);
-
-// Modifier une infirmière
-router.put("/:id", updateNurse);
-
-// Supprimer une infirmière
-router.delete("/:id", deleteNurse);
-
-// Marquer présence / absence
-router.patch("/:id/presence", togglePresence);
+router.post('/', isAuthenticated, addNurse);
+router.get('/', isAuthenticated, listNurses);
+router.delete('/:id', isAuthenticated, deleteNurse);
+router.post('/shifts', isAuthenticated, scheduleShifts);
+router.put('/shifts/complete', isAuthenticated, completeShift);
+router.get('/hours', isAuthenticated, getWorkedHours);
+router.get('/on-duty', isAuthenticated, getOnDutyNurses);
+router.get('/shifts', isAuthenticated, listAllShifts);
 
 export default router;

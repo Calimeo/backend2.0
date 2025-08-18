@@ -37,6 +37,11 @@ const productSchema = new mongoose.Schema(
     expiryDate: {
       type: Date,
     },
+    hospital: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User", // ou "Hospital" selon ton modèle
+        required: true,
+      },
   },
   { timestamps: true }
 );
