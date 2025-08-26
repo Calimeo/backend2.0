@@ -1,4 +1,4 @@
-import DoctorAvailability from "../models/doctorAvailability.js";
+import DoctorAvailability from "../models/DoctorAvailability.js";
 import {User }from "../models/userSchema.js";
 import mongoose from 'mongoose';
 import { Appointment } from "../models/appointmentSchema.js"; 
