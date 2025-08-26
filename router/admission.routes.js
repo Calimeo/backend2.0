@@ -1,14 +1,28 @@
 import express from "express";
 import {
-  addAdmission,
-  getAllAdmissions,
+  admitPatient,
   dischargePatient,
+  getActiveAdmissions,
+  getAdmissionHistory,
+  getAdmission,
+  transferPatient
 } from "../controller/admission.controller.js";
+import {
+  isAuthenticated,
+  isAuthorized,
+} from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.post("/", addAdmission); // Ajouter un patient
-router.get("/", getAllAdmissions); // Récupérer tous les patients
-router.put("/:id/discharge", dischargePatient); // Marquer comme sorti
+// Toutes les routes protégées
+router.use(isAuthenticated);
+
+// Routes pour l'admission
+router.post("/",  admitPatient);
+router.put("/:admissionId/discharge",  dischargePatient);
+router.put("/:admissionId/transfer",  transferPatient);
+router.get("/active",  getActiveAdmissions);
+router.get("/history",  getAdmissionHistory);
+router.get("/:admissionId",  getAdmission);
 
 export default router;

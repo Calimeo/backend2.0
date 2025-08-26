@@ -130,6 +130,10 @@ export const updateDoctorStatus = catchAsyncErrors(async (req, res, next) => {
   const { status } = req.body;
   const hospitalId = req.user._id;
 
+  console.log("Hospital ID:", hospitalId);
+  console.log("Doctor ID:", doctorId);
+  console.log("New status:", status);
+
   // Vérifier que l'utilisateur est un hôpital
   if (req.user.role !== 'Hospital') {
     return next(new ErrorHandler('Accès refusé. Réservé aux hôpitaux.', 403));
@@ -138,31 +142,45 @@ export const updateDoctorStatus = catchAsyncErrors(async (req, res, next) => {
   // Valider le statut
   const validStatuses = ['present', 'absent', 'on_break'];
   if (!validStatuses.includes(status)) {
-    return next(new ErrorHandler('Statut invalide', 400));
+    return next(new ErrorHandler('Statut invalide. Options: present, absent, on_break', 400));
   }
 
-  // Trouver et mettre à jour le médecin
-  const doctor = await Doctor.findOneAndUpdate(
-    { 
-      _id: doctorId,
-      hospitalId: hospitalId // S'assurer que le médecin appartient à l'hôpital
-    },
-    { status },
-    { 
-      new: true,
-      runValidators: true
+  try {
+    // Trouver et mettre à jour le médecin dans User
+    const doctor = await User.findOneAndUpdate(
+      { 
+        _id: doctorId,
+        role: 'Doctor', // S'assurer que c'est un docteur
+        hospitalId: hospitalId // S'assurer que le docteur appartient à l'hôpital
+      },
+      { status },
+      { 
+        new: true,
+        runValidators: true
+      }
+    ).select('-password');
+
+    if (!doctor) {
+      console.log("Docteur non trouvé avec ces critères:");
+      console.log("- ID:", doctorId);
+      console.log("- Role: Doctor");
+      console.log("- Hospital ID:", hospitalId);
+      
+      return next(new ErrorHandler('Médecin non trouvé ou non autorisé', 404));
     }
-  ).select('-password');
 
-  if (!doctor) {
-    return next(new ErrorHandler('Médecin non trouvé ou non autorisé', 404));
+    console.log("Docteur mis à jour:", doctor);
+
+    res.status(200).json({
+      success: true,
+      message: 'Statut mis à jour avec succès',
+      doctor
+    });
+
+  } catch (error) {
+    console.error("Erreur détaillée:", error);
+    return next(new ErrorHandler('Erreur serveur', 500));
   }
-
-  res.status(200).json({
-    success: true,
-    message: 'Statut mis à jour avec succès',
-    doctor
-  });
 });
 
 // Obtenir tous les médecins d'un hôpital avec leurs statuts

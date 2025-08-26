@@ -1,23 +1,31 @@
 import express from "express";
 import {
-  getRooms,
   createRoom,
+  addBedToRoom,
+  getHospitalRooms,
+  getRoom,
+  updateRoom,
   deleteRoom,
-  addBed,
-  deleteBed,
-  toggleBedAvailability,
+  updateBedStatus,
+  getRoomStats,
+  getHospitalRoomsSimple
 } from "../controller/room.controller.js";
+import {
+  isAuthenticated,
+  isAuthorized,
+} from "../middlewares/auth.js";
 
 const router = express.Router();
 
-// Routes modifiées pour inclure l'hôpital
-router.get("/hospitals/:hospitalId/rooms", getRooms);
-router.post("/hospitals/:hospitalId/rooms", createRoom);
-router.delete("/hospitals/:hospitalId/rooms/:id", deleteRoom);
-
-// Routes pour la gestion des lits
-router.post("/rooms/:roomId/beds", addBed); // hospitalId dans le body
-router.delete("/hospitals/:hospitalId/rooms/:roomId/beds/:bedId", deleteBed);
-router.put("/hospitals/:hospitalId/rooms/:roomId/beds/:bedId/toggle", toggleBedAvailability);
+// Routes protégées pour les hôpitaux
+router.post("/add", isAuthenticated, createRoom);
+router.post("/:roomId/beds", isAuthenticated, addBedToRoom);
+router.get("/", isAuthenticated, getHospitalRooms);
+router.get("/simple", isAuthenticated, getHospitalRoomsSimple);
+router.get("/stats", isAuthenticated, getRoomStats);
+router.get("/:roomId", isAuthenticated, getRoom);
+router.put("/:roomId", isAuthenticated, updateRoom);
+router.delete("/:roomId", isAuthenticated, deleteRoom);
+router.put("/:roomId/beds/:bedId", isAuthenticated, updateBedStatus);
 
 export default router;

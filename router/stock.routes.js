@@ -4,6 +4,9 @@ import {
   getInventory,
   updateInventory,
   deleteInventory,
+  getInventoryStats,
+  getLowStockItems,
+  updateStockQuantity
 } from "../controller/inventory.controller.js";
 import { isAuthenticated ,isAuthorized,} from "../middlewares/auth.js";
 
@@ -20,5 +23,8 @@ router.put("/:id", isAuthenticated, isAuthorized("Hospital"), updateInventory);
 
 // ❌ Supprimer un item
 router.delete("/:id", isAuthenticated, isAuthorized("Hospital"), deleteInventory);
+router.get('/stats', getInventoryStats);
+router.get('/low-stock', getLowStockItems);
+router.put('/:id/stock', updateStockQuantity);
 
 export default router;

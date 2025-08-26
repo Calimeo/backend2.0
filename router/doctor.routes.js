@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Hôpital ajoute un médecin
 router.post("/add",isAuthenticated, isAuthorized("Hospital"), addDoctorToHospital);
-router.get("/get", isAuthenticated, isAuthorized("Hospital"), getDoctorsByHospital);
+router.get("/get", isAuthenticated, getDoctorsByHospital);
 router.patch('/status/:doctorId', isAuthenticated, isAuthorized("Hospital"), updateDoctorStatus);
 
 export default router;

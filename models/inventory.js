@@ -5,7 +5,7 @@ const inventorySchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ["medicine", "supply"],
+      enum: ["medicine", "supply","equipment"],
       required: true,
     },
     subtype: {
@@ -39,6 +39,11 @@ const inventorySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    hospital: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
   },
   { timestamps: true }
 );

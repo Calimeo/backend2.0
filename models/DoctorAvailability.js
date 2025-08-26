@@ -16,4 +16,5 @@ const doctorAvailabilitySchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-export default mongoose.model("DoctorAvailability", doctorAvailabilitySchema);
+export default mongoose.models.DoctorAvailability ||
+  mongoose.model("DoctorAvailability", doctorAvailabilitySchema);

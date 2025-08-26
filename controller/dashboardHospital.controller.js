@@ -1,5 +1,5 @@
 // controllers/hospitalDashboardController.js
-import Doctor from "../models/doctor.js";
+import { User } from "../models/userSchema.js"; // Docteurs, Patients, etc. sont dans User
 import Patient from "../models/Patient.js";
 import { Appointment } from "../models/appointmentSchema.js";
 import Nurse from "../models/nurse.js";
@@ -8,8 +8,6 @@ import Birth from "../models/birth.js";
 import Accounting from "../models/accounting.js";
 import BloodStock from "../models/bloodStock.js";
 import Death from "../models/death.js";
-
-
 
 export const getHospitalDashboard = async (req, res) => {
   try {
@@ -26,7 +24,7 @@ export const getHospitalDashboard = async (req, res) => {
       deaths,
       births,
     ] = await Promise.all([
-      Doctor.find({ hospitalId }),
+      User.find({ hospitalId, role: "Doctor" }),  // ✅ docteurs dans User
       Patient.find({ hospitalId }),
       Appointment.find({ hospitalId }),
       Nurse.find({ hospitalId }),
@@ -58,15 +56,14 @@ export const getHospitalDashboard = async (req, res) => {
         bloodStock,
         deaths,
         births,
-      }
+      },
     });
-
   } catch (error) {
     console.error("Erreur getHospitalDashboard:", error);
     res.status(500).json({
       success: false,
       message: "Erreur interne du serveur",
-      error: error.message
+      error: error.message,
     });
   }
 };

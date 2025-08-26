@@ -37,6 +37,7 @@ import deathRoute from "./router/death.routes.js";
 import hospitalDashboardRoutes from "./router/dashboard.routes.js";
 import birthRoute from "./router/birth.routes.js";
 import prescriptionRoute from "./router/prescription.routes.js";
+import laboratoireRoute from "./router/laboratoire.routes.js";
 
 const app = express()
 
@@ -71,9 +72,9 @@ app.use("/api/v1/appoitment", AppointmentRouter);
 app.use('/api/hopitaux', hopitalRoutes);
 // app.use('/api/services', serviceRoutes);
 app.use('/api/medecins', medecinRoutes);
-app.use('/api/', chambreRoutes);
+app.use('/api/rooms', chambreRoutes);
 app.use('/api/lits', litRoutes);
-app.use('/api/admissions', admissionRoutes);
+app.use('/api/v1/admissions', admissionRoutes);
 app.use('/api/fournitures', fournitureRoutes);
 app.use('/api/v1/patients', patientRoutes);
 app.use('/api/ordonnances', ordonnanceRoutes);
@@ -85,7 +86,7 @@ app.use('/api/statistiques', statistiquesRoutes);
 app.use('/api/parametres', parametresRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use("/api/v1/doctors", hospitalDoctorRoute);
-app.use("/api/v1/service", serviceRoute);
+app.use("/api/services", serviceRoute);
 // app.use("/api/v1/rvz", apppoitmentallRoute);
 app.use("/api/nurses", nurseRoute);
 app.use("/api/v1", pharmacyRoute);
@@ -97,6 +98,8 @@ app.use("/api/v1/death", deathRoute);
 app.use("/api/v1/dashboard", hospitalDashboardRoutes);
 app.use("/api/v1/birth", birthRoute);
 app.use("/api/v1/prescription", prescriptionRoute);
+app.use("/api/v1/laboratoire", laboratoireRoute);
+
 
 
 dbConnection();
